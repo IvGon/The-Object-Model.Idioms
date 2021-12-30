@@ -147,24 +147,6 @@ class Main
     @route = train.route unless train.nil?
   end
 
-  # def main_menu
-
-  #   loop do
-
-  #     puts "Enter your choice or '0' for exit"
-
-  #     MENU.each { |item| puts "#{item[:index].to_s.rjust 15} -  #{item[:title]}" }
-  #     print '-> '
-
-  #     choice = gets.chomp.to_i
-  #     break if choice.zero?
-
-  #     choice_item = MENU.find { |item| item[:index] == choice }
-  #     send(choice_item[:action]) unless choice_item.nil?
-
-  #   end
-  # end
-
   def menu(menu)
     loop do
       puts "Enter your choice or '0' for exit"
