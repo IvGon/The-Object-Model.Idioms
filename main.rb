@@ -1,3 +1,4 @@
+require_relative 'accessors'
 require_relative 'instance_counter'
 require_relative 'station'
 require_relative 'route'
@@ -10,17 +11,14 @@ require_relative 'train'
 require_relative 'passenger_train'
 require_relative 'cargo_train'
 
+
 class Main
 
-  MENU = [
-    { index: 1, title: 'create new station', action: :new_station },
-    { index: 2, title: 'create new route and manage on it', action: :route_action },
-    { index: 3, title: 'create new train', action: :new_train },
-    { index: 4, title: 'train menu ', action: :train_menu },
-    { index: 5, title: 'set route for train', action: :set_route_for_train },
-    { index: 6, title: 'move train on the route', action: :move_train_menu },
-    { index: 7, title: 'show stations and trains at the station', action: :train_all_by_station },
-    { index: 8, title: 'Object_list', action: :object_list },
+ MENU = [
+    { index: 1, title: 'Route constructor', action: :route_action },
+    { index: 2, title: 'Train constructor', action: :train_menu },
+    { index: 3, title: 'Station dispatcher', action: :move_train_menu },
+    { index: 4, title: 'Object_list', action: :object_list },
     { index: 0, title: 'for exit', action: :break }
   ].freeze
 
@@ -33,12 +31,14 @@ class Main
   ].freeze
 
   MENU_ROUTE = [
-    { index: 1, title: 'create new station', action: :new_station },
-    { index: 2, title: 'delete station', action: :del_station },
-    { index: 3, title: 'create new route', action: :new_route },
-    { index: 4, title: 'add station on route', action: :add_station },
-    { index: 5, title: 'delete station on route', action: :del_station },
-    { index: 6, title: 'show stations from route', action: :show_stations },
+    { index: 1, title: 'Create new station', action: :new_station },
+    { index: 2, title: 'Delete station', action: :delete_station },
+    { index: 3, title: 'Create new route', action: :new_route },
+    { index: 4, title: 'Add station on route', action: :add_station },
+    { index: 5, title: 'Delete station on route', action: :del_station },
+    { index: 6, title: 'Show stations from route', action: :show_stations },
+    { index: 7, title: 'Route info', action: :curent_route_info },
+    { index: 8, title: 'station List', action: :station_list },
     { index: 0, title: 'Back to Main-menu', action: :break }
   ].freeze
 
@@ -52,6 +52,8 @@ class Main
     { index: 7, title: 'show stations from route', action: :train_route_stations },
     { index: 8, title: 'Train info', action: :current_train_info }, 
     { index: 9, title: 'Select train by number', action: :train_find_by_number }, 
+    { index: 10, title: 'list of Wagons', action: :list_of_wagons },
+    { index: 11, title: 'Train_list', action: :train_list },
     { index: 0, title: 'Back to Main-menu', action: :break }
   ].freeze
 
@@ -83,7 +85,7 @@ class Main
   def preparation_of_test_data
     name_station  = %w[Харьков Белгород Курск Орел Тула Москва]
     name_station1 = %w[Харьков Лозовая Запорожье Синельниково Новоалексеевка Симферополь]
-    number_train  = %w[19 20 81 82 67 68]
+    number_train  = %w[019-Ps 020-Ps 081-Ps 082-Ps 067-Ps 068-Ps]
     seats_wagons = [12, 54, 36, 18, 12, 12, 36, 54, 54, 54]
 
     num_wagon = 12_345_600
@@ -100,23 +102,23 @@ class Main
 
     # ---------------------------- Let's form a list of routes ------------------------------------
 
-    route = Route.new('19', 'Харьков', 'Москва')
+    route = Route.new('019', 'Харьков', 'Москва')
     route.station = name_station
 
-    route = Route.new('20', 'Москва', 'Харьков')
+    route = Route.new('020', 'Москва', 'Харьков')
     route.station = name_station.reverse
 
-    route = Route.new('81', 'Харьков', 'Симферополь')
+    route = Route.new('081', 'Харьков', 'Симферополь')
     route.station = name_station1
 
-    route = Route.new('82', 'Симферополь', 'Харьков')
+    route = Route.new('082', 'Симферополь', 'Харьков')
     route.station = name_station1.reverse
 
-    route = Route.new('67', 'Москва', 'Симферополь')
+    route = Route.new('067', 'Москва', 'Симферополь')
     route.station = name_station.reverse + name_station1
     route.station = route.station.uniq
 
-    route = Route.new('68', 'Симферополь', 'Москва')
+    route = Route.new('068', 'Симферополь', 'Москва')
     route.station = name_station1.reverse + name_station
     route.station = route.station.uniq
 
@@ -136,16 +138,34 @@ class Main
 
       # ---------------------------- Assigning routes to trains --------------
 
-      route = spr_route.find { |item| item.name.include?(number.to_s) }
+      route = spr_route.find { |item| item.name.include?(number.to_s[0,3]) }
       train.assign_train_route(route)
       station = route.station[0]
       st_obj = spr_station.find { |item| item.name == station }
     end
 
     @train = spr_train[0]
-    @station = spr_station.find { |item| item.name == 'Kharkov' }
+    @station = spr_station.find { |item| item.name == 'Харьков' }
     @route = train.route unless train.nil?
   end
+
+  # def main_menu
+
+  #   loop do
+
+  #     puts "Enter your choice or '0' for exit"
+
+  #     MENU.each { |item| puts "#{item[:index].to_s.rjust 15} -  #{item[:title]}" }
+  #     print '-> '
+
+  #     choice = gets.chomp.to_i
+  #     break if choice.zero?
+
+  #     choice_item = MENU.find { |item| item[:index] == choice }
+  #     send(choice_item[:action]) unless choice_item.nil?
+
+  #   end
+  # end
 
   def menu(menu)
     loop do
@@ -342,7 +362,7 @@ def create_station(name)
     raise  'Such a station is on the list!' if work_st.include?(new_st)
 
     prev_st = input_string('Paste after station: ')
-    raise 'There is no such station on the list!' if work_st.include?(prev_st)
+    raise 'There is no such station on the list!' unless work_st.include?(prev_st)
 
     raise 'This station is behind the end station!' if work_st.index(prev_st) == work_st.size - 1
 
@@ -373,6 +393,10 @@ def create_station(name)
     route.show_stations
   end
 
+  def curent_route_info
+    route.info
+  end
+
   # ---------------------------------- create a new train ---------------
   def create_train(num_train, type, num_cars)
     CargoTrain.new(num_train, num_cars) if type == 1
@@ -390,13 +414,13 @@ def create_station(name)
     raise ArgumentError, 'There will be few wagons!' if num_cars < 1
 
     new_train = create_train(num_train, type, num_cars)
-    raise 'Unsuccessful attempt to create a train!' unless new_train.obj_valid?
+    raise 'Unsuccessful attempt to create a train!' unless new_train.valid?
     
     @train = new_train
     puts "Train number #{num_train} has been successfully created!"
     puts train
   rescue StandardError => e
-    puts 'errors: ' + new_train.errors.to_s unless new_train.nil?
+    puts 'errors: ' + new_train.valid_errors.to_s unless new_train.nil?
     puts "#{e.class}: #{e.message}"
     retry if re_enter == 1
     puts 'Unsuccessful attempt to create a train!'
@@ -431,7 +455,7 @@ def create_station(name)
       capacity = input_string('Number of seats in the wagon: ').to_i
       wagon = PassengerWagon.new(num_wagon, capacity)
     else
-      capacity = input_string('Wagon capacity: ').to_f
+      capacity = input_string('Wagon capacity: ')
       wagon = CargoWagon.new(num_wagon, capacity)
     end
 
@@ -482,7 +506,7 @@ def create_station(name)
   # --------------------------------- the number of cars on the train ---------
 
   def number_cars
-    train.number_cars unless train.nil?
+    train.num_of_cars unless train.nil?
   end
 
   # -------------------------- set the route for the train ---------------------
@@ -499,7 +523,7 @@ def create_station(name)
     if train_obj.nil?
       puts "There is no such train #{num_train}"
     else
-      train_obj.train_curent_station
+      puts train_obj.route.station
     end
   end
 
@@ -596,6 +620,7 @@ def create_station(name)
   # <------------------------------ take a train to station -----------------
 
   def take_train_to_station
+    # train_list
     train_obj =  train_find_by_number
     next_station = train_obj.train_next_station
 
@@ -606,12 +631,14 @@ def create_station(name)
 
       st_obj = spr_station.find { |item| item.name == next_station }
       st_obj.train_arrival(train_obj)
+      puts "Train #{train_obj.number} arrived on station: #{train_obj.condition}."
     end
   end
 
   # <------------------------------ Send a train from the station  -----------
 
   def send_train_from_station
+    # train_list
     train_obj =  train_find_by_number
     if train_obj.nil?
       puts "There is no such train! #{num_train}"
@@ -623,6 +650,7 @@ def create_station(name)
         train_obj.speed = 80
         st_obj = spr_station.find { |item| item.name == cur_station }
         st_obj.train_departure(train_obj) if st_obj.nil? == false
+        puts "Train #{train_obj.number} sent on the way: #{train_obj.condition}."
       end
     end
   end
@@ -630,13 +658,14 @@ def create_station(name)
   # <------------------------------ show trains at the station ----------------
 
   def show_trains_at_station
+    station_list
     name_station = input_string('Show trains at the station: ')
     st_obj = spr_station.find { |item| item.name == name_station }
 
-    type = input_string('Wagon type (0 - cargo, 1 - passenger): ').to_i
+    type = input_string('Wagon type (0 - грузовой, 1 - пассажирский): ').to_i
 
-    type_train = 'cargo' if type.zero?
-    type_train = 'passenger' if type == 1
+    type_train = 'грузовой' if type.zero?
+    type_train = 'пассажирский' if type == 1
 
     if st_obj.nil?
       puts "here is no such train! #{st_obj.name}!"

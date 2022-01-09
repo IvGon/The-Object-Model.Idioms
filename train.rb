@@ -4,20 +4,28 @@ class Train
   require_relative 'cargo_train'
   require_relative 'instance_counter'
   require_relative 'validate'
+  require_relative 'accessors'
+  require_relative 'route'
 
+  include Accessors
   include Validation
+  include Validate
   include Manufacturer
   include InstanceCounter
 
-  attr_reader :number, :type, :route_name, :route
-  attr_accessor :speed, :curent_station
+  attr_reader :number, :type, :route_name
+  attr_reader :condition, :wagons
+  # attr_accessor :speed, :curent_station
 
-  attr_reader :condition, :num_of_cars, :wagons
+  attr_accessor_with_history :curent_station
 
-  NUMBER_FORMAT = /^\d{3}-?[а-яА-Я]{2}$/i
+  strong_attr_accessor( :speed, Fixnum )
+  strong_attr_accessor( :num_of_cars, Integer )
+  strong_attr_accessor( :route, Route )
+
+  NUMBER_FORMAT = /^\d{3}-?[a-zA-Z]{2}$/i
   @@trains = []
 
-  #------------------------------------ Obj Train list --------------------
 
   def self.all
     @@trains
@@ -25,7 +33,7 @@ class Train
 
   # --------------------------------------------- find Obj Train by number --
 
-  def find(number)
+  def self.find(number)
     @@trains.find { |train| train.number == number }
   end
 
@@ -39,16 +47,16 @@ class Train
     @speed = 0
     @curent_station = 'Харьков'
 
+    raise 'ValidationErrors!' unless  validate!
     @@trains.push(self)
-    register_instance
+    register_instance    
+  rescue StandardError => e
+    puts "#{e.class}: #{e.message}"
+    puts 'errors: ' + self.valid_errors.messages.to_s
+    return nil
   end
 
-  # ------------------------------------ number of cars ------
-
-  def number_cars
-    @wagons.size
-  end
-
+ 
   # ---------------------------------------- assign_train_route -----
 
   def assign_train_route(assign_route)
@@ -198,9 +206,9 @@ class Train
     false
   end
 
-  def validate!(number)
-    raise ArgumentError, "Invalid train number format: #{number} !" if number !~ NUMBER_FORMAT
-  end
+  #def validate!(number)
+  #  raise ArgumentError, "Invalid train number format: #{number} !" if number !~ NUMBER_FORMAT
+  #end
 end
 
 class TrainValidator
@@ -209,7 +217,7 @@ class TrainValidator
   validates :number, type: String
   validates :number,
             msg: 'Invalid number format!',
-            option: proc { |p| p.number =~ /^\d{3}-?[а-яА-Я]{2}$/i }
+            option: proc { |p| p.number =~ /^\d{3}-?[a-zA-Z]{2}$/i }
   validates :type, type: String
   validates :type,
             msg: 'Wrong train type!',
@@ -220,32 +228,8 @@ class TrainValidator
             option: proc { |p| p.num_of_cars > 0 }
 end
 
-class PassengerTrainValidator < TrainValidator
-  validates :number, type: String
-  validates :number,
-            msg: 'Invalid number format!',
-            option: proc { |p| p.number =~ /^\d{3}-?[а-яА-Я]{2}$/i }
-  validates :type, type: String
-  validates :type,
-            msg: 'Wrong train type!',
-            option: proc { |p| %w[пассажирский грузовой].include? p.type }
-  validates :num_of_cars, type: Integer
-  validates :num_of_cars,
-            msg: 'The number of cars cannot be less than 1!',
-            option: proc { |p| p.num_of_cars > 0 }
-end
 
-class CargoTrainValidator < TrainValidator
-  validates :number, type: String
-  validates :number,
-            msg: 'Invalid number format!',
-            option: proc { |p| p.number =~ /^\d{3}-?[а-яА-Я]{2}$/i }
-  validates :type, type: String
-  validates :type,
-            msg: 'Wrong train type!',
-            option: proc { |p| %w[пассажирский грузовой].include? p.type }
-  validates :num_of_cars, type: Integer
-  validates :num_of_cars,
-            msg: 'The number of cars cannot be less than 1!',
-            option: proc { |p| p.num_of_cars > 0 }
-end
+# tr = Train.new('123-', 'пасажирский', 0)
+# puts tr
+# tr.valid?
+# puts tr.valid_errors.messages.to_s

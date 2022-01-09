@@ -51,6 +51,7 @@ class Route
 
   def show_stations
     @station.each { |name_st| print "#{name_st} " }
+    puts
   end
 
   # ------------------------------- Route info ---------------------

@@ -1,11 +1,14 @@
 class Station
   require_relative 'instance_counter'
+  require_relative 'accessors'
+  include Accessors
   include InstanceCounter
 
   @@stations = []
 
   attr_reader :name
-  attr_accessor :trains
+  # attr_accessor :trains
+  attr_accessor_with_history :trains
 
   #------------------------------------ Station Obj list --------------------
 
@@ -137,11 +140,10 @@ class Station
     raise 'instance_variables not defined!' if object.instance_variables.size < 2
     raise 'Station name not defined!' if object.instance_variable_get(:@name).empty?
     raise 'Station name less than 1 character!' if object.instance_variable_get(:@name).empty?
+    true
   rescue StandardError => e
     puts 'e.message ' + e.message
     false
-  else
-    true
   end
 end
 
