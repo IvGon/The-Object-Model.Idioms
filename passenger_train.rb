@@ -21,3 +21,20 @@ class PassengerTrain < Train
     puts e.message
   end
 end
+
+class PassengerTrainValidator
+  include Validate
+  
+  validates :number, type: String
+  validates :number,
+            msg: 'Invalid number format!',
+            option: proc { |p| p.number =~ /^\d{3}-?[a-zA-Z]{2}$/i }
+  validates :type, type: String
+  validates :type,
+            msg: 'Wrong train type!',
+            option: proc { |p| p.type == 'пассажирский' }
+  validates :num_of_cars, type: Integer
+  validates :num_of_cars,
+            msg: 'The number of cars cannot be less than 1!',
+            option: proc { |p| p.num_of_cars > 0 }
+end

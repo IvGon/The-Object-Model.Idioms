@@ -22,3 +22,20 @@ class CargoWagon < Wagon
     self.loading -= volume
   end
 end
+
+class CargoWagonValidator
+  include Validate
+
+  validates :reg_number, type: String
+  validates :reg_number,
+            msg: 'Invalid number format!',
+            option: proc { |p| p.reg_number =~ /^\d{8}$/i }
+  validates :type_wagon, type: String
+  validates :type_wagon,
+            msg: 'Wrong train type!',
+            option: proc { |p| p.type_wagon == 'грузовой' }
+  # validates :capacity, type: Fixnum
+  validates :full_volume,
+            msg: 'The capacity of cars cannot be less than 0!',
+            option: proc { |p| p.full_volume > 0 }
+end

@@ -1,18 +1,22 @@
 module Validation
-  def obj_valid?
+
+  def valid?
+    raise 'ValidationErrors' unless  validate!
+    true
+  rescue StandardError
+    false
+  end
+
+  def validate!
     valid_class = Object.const_get("#{self.class.name}Validator")
     @validator = valid_class.new(self)
-    @validator.valid?
+    @validator.obj_valid?
   end
 
-  def attr_validate(*args)
-    obj_valid? unless defined?(@validator)
-    validate(@validator.class.validators.find { |item| item[0] == args[0] })
-    @errors.messages.empty?
-  end
 
-  def errors
-    return @validator.errors.messages if defined?(@validator)
+  def valid_errors
+    return {} unless defined?(@validator)
+    @validator.errors
   end
 end
 
@@ -42,10 +46,11 @@ module Validate
       @errors = ValidationErrors.new
     end
 
-    def valid?
+    def obj_valid?
       self.class.validators.each { |condition| validate(condition) }
       @errors.messages.empty?
     end
+
 
     private
 
@@ -75,7 +80,8 @@ module Validate
     end
 
     def type_validator(attribute, condition)
-      return if @object.send(attribute).is_a?(condition[:type])
+      raise unless @object.send(attribute).is_a?(condition[:type])
+    rescue StandardError  
       @errors.add(attribute, "it should be #{condition[:type].attribute}")
     end
   end
