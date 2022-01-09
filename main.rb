@@ -14,19 +14,7 @@ require_relative 'cargo_train'
 
 class Main
 
-  # MENU = [
-  #   { index: 1, title: 'create new station', action: :new_station },
-  #   { index: 2, title: 'create new route and manage on it', action: :route_action },
-  #   { index: 3, title: 'create new train', action: :new_train },
-  #   { index: 4, title: 'train menu ', action: :train_menu },
-  #   { index: 5, title: 'set route for train', action: :set_route_for_train },
-  #   { index: 6, title: 'move train on the route', action: :move_train_menu },
-  #   { index: 7, title: 'show stations and trains at the station', action: :train_all_by_station },
-  #   { index: 8, title: 'Object_list', action: :object_list },
-  #   { index: 0, title: 'for exit', action: :break }
-  # ].freeze
-
-  MENU = [
+ MENU = [
     { index: 1, title: 'Route constructor', action: :route_action },
     { index: 2, title: 'Train constructor', action: :train_menu },
     { index: 3, title: 'Station dispatcher', action: :move_train_menu },
